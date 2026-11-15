@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+/*
+ * Colors are taken from the month illustrations:
+ * the dark wooden table, the linen tablecloth with red and blue stripes,
+ * dried apricots, plums and the blue plate.
+ */
+@theme {
+  /* Page (dark, like the illustration backgrounds) */
+  --color-page: #2a130f;
+  --color-page-raised: #3a1c15;
+  --color-page-line: #533127;
+  --color-cream: #f3e8d8;
+  --color-cream-muted: #c9b29c;
+
+  /* Cards (linen) */
+  --color-card: #f6eee2;
+  --color-card-sunk: #ece0cf;
+  --color-ink: #2a130f;
+  --color-muted: #7a6150;
+  --color-line: #e0cfba;
+
+  /* Tablecloth stripes */
+  --color-stripe-red: #9e2333;
+  --color-stripe-blue: #3b6680;
+
+  --font-sans: "Noto Sans Armenian Variable", system-ui, sans-serif;
+  --font-serif: "Noto Serif Armenian Variable", Georgia, serif;
+}
+
+:root {
+  color-scheme: dark;
+  /* Overridden per month on the month page. */
+  --accent: #9e2333;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-cream);
+}
+
+/* Thin tablecloth stripe used at the top of linen cards */
+.linen-stripe {
+  height: 7px;
+  background: linear-gradient(
+    to bottom,
+    var(--color-stripe-red) 0 3px,
+    transparent 3px 5px,
+    var(--color-stripe-blue) 5px 6px,
+    transparent 6px
+  );
+}
+
+/* Briefly highlights a day after "Go to date" or "Today" */
+.day-flash {
+  position: relative;
+  z-index: 1;
+  animation: day-flash 2.4s ease-out;
+}
+
+@keyframes day-flash {
+  0%, 40% {
+    box-shadow: inset 0 0 0 3px var(--accent);
+    background-color: color-mix(in srgb, var(--accent) 16%, var(--color-card));
+  }
+  100% {
+    box-shadow: inset 0 0 0 3px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .day-flash { animation: none; box-shadow: inset 0 0 0 3px var(--accent); }
+}
+
+/* Bottom sheet / dialog */
+dialog.sheet {
+  margin: auto auto 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: 85dvh;
+  border-radius: 1.25rem 1.25rem 0 0;
+  padding: 0;
+  border: 0;
+  background: var(--color-card);
+  color: var(--color-ink);
+  color-scheme: light;
+}
+
+dialog.sheet::backdrop {
+  background: rgb(20 8 6 / 0.6);
+}
+
+dialog.sheet[open] {
+  animation: sheet-up 220ms ease-out;
+}
+
+@media (min-width: 768px) {
+  dialog.sheet {
+    margin: auto;
+    max-width: 28rem;
+    border-radius: 1.25rem;
+  }
+  dialog.sheet[open] {
+    animation: sheet-fade 160ms ease-out;
+  }
+}
+
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes sheet-fade {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.sheet[open] { animation: none; }
+}
