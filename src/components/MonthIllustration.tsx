@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import type { Locale, MonthTheme } from "@/content/types";
 
@@ -36,14 +35,12 @@ export function MonthIllustration({
           <code className="rounded bg-page px-2 py-1 text-xs text-cream">public/illustrations/{ill.file}</code>
         </div>
       ) : (
-        <Image
+        <img
           key={ill.file}
-          src={`/illustrations/${ill.file}`}
+          src={`/illustrations/${ill.file.replace(/\.png$/, ".webp")}`}
           alt={ill.alt[locale]}
-          fill
-          sizes="(min-width: 1024px) 40vw, 100vw"
-          priority
-          className="object-cover"
+          fetchPriority="high"
+          className="absolute inset-0 h-full w-full object-cover"
           style={{ objectPosition: ill.focus ?? "50% 35%" }}
           onError={() => setMissing(true)}
         />
@@ -51,3 +48,4 @@ export function MonthIllustration({
     </div>
   );
 }
+

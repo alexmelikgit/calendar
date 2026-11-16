@@ -1,6 +1,5 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import { Link } from "react-router";
+import { NotFound } from "./NotFound";
 import { SiteHeader } from "@/components/SiteHeader";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionary";
@@ -8,39 +7,22 @@ import { formatRange } from "@/i18n/format";
 import { monthPath } from "@/lib/calendar";
 import { getCategory, getDatesOf, getFeast } from "@/lib/content";
 
-type Props = PageProps<"/[lang]/feasts/[slug]">;
-
-export const dynamicParams = false;
-export async function generateStaticParams() {
-  const { feasts } = await import("@/content/feasts");
-  return feasts.map(({ slug }) => ({ slug }));
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { lang, slug } = await params;
-  const feast = await getFeast(slug);
-  if (!isLocale(lang) || !feast) return {};
-  return { title: feast.name[lang], description: feast.short[lang] };
-}
-
-/**
- * Basic feast page — a starting point for the full design.
- */
-export default async function FeastPage({ params }: Props) {
-  const { lang, slug } = await params;
-  if (!isLocale(lang)) notFound();
-  const feast = await getFeast(slug);
-  if (!feast) notFound();
-
-  const [category, dates] = await Promise.all([getCategory(feast.categoryId), getDatesOf(slug)]);
+export function FeastPage({ lang, slug }: { lang: string; slug: string }) {
+  if (!isLocale(lang)) return <NotFound />;
+  const feast = getFeast(slug);
+  if (!feast) return <NotFound />;
+  const category = getCategory(feast.categoryId);
+  const dates = getDatesOf(slug);
   const dict = getDictionary(lang);
   const color = category?.color ?? "#9e2333";
 
   return (
     <div style={{ "--accent": color } as React.CSSProperties}>
+      <title>{`${feast.name[lang]} · ${dict.siteTitle}`}</title>
+      <meta name="description" content={feast.short[lang]} />
       <SiteHeader locale={lang} dict={dict} />
       <main className="mx-auto max-w-2xl px-4 pt-4 pb-16 md:pt-10">
-        <Link href={`/${lang}`} className="text-sm text-cream-muted hover:text-cream">
+        <Link to={`/${lang}`} className="text-sm text-cream-muted hover:text-cream">
           ← {dict.backToCalendar}
         </Link>
 
@@ -74,7 +56,7 @@ export default async function FeastPage({ params }: Props) {
                 return (
                   <li key={d.start}>
                     <Link
-                      href={monthPath(lang, { year: y, month: m })}
+                      to={monthPath(lang, { year: y, month: m })}
                       className="flex items-center justify-between gap-4 rounded-xl bg-card px-4 py-3 text-ink ring-[var(--accent)] hover:ring-2"
                     >
                       <span>{formatRange(d.start, d.end, lang, dict, true)}</span>

@@ -56,11 +56,11 @@ function toEvent(d: FeastDate, locale: Locale): CalendarEvent | null {
 }
 
 /** Events that overlap [from, to] (inclusive), sorted by start date. */
-export async function getEventsBetween(
+export function getEventsBetween(
   from: ISODate,
   to: ISODate,
   locale: Locale,
-): Promise<CalendarEvent[]> {
+): CalendarEvent[] {
   return feastDates
     .filter((d) => d.start <= to && d.end >= from)
     .map((d) => toEvent(d, locale))
@@ -68,24 +68,25 @@ export async function getEventsBetween(
     .sort((a, b) => a.start.localeCompare(b.start) || b.end.localeCompare(a.end));
 }
 
-export async function getCategories(locale: Locale): Promise<LocalizedCategory[]> {
+export function getCategories(locale: Locale): LocalizedCategory[] {
   return categories.map((c) => localizeCategory(c, locale));
 }
 
-export async function getMonthTheme(month: number): Promise<MonthTheme> {
+export function getMonthTheme(month: number): MonthTheme {
   return monthThemes[month - 1];
 }
 
-export async function getFeast(slug: string): Promise<Feast | undefined> {
+export function getFeast(slug: string): Feast | undefined {
   return feasts.find((f) => f.slug === slug);
 }
 
-export async function getCategory(id: string): Promise<FeastCategory | undefined> {
+export function getCategory(id: string): FeastCategory | undefined {
   return categories.find((c) => c.id === id);
 }
 
-export async function getDatesOf(slug: string): Promise<FeastDate[]> {
+export function getDatesOf(slug: string): FeastDate[] {
   return feastDates
     .filter((d) => d.feastSlug === slug)
     .sort((a, b) => a.start.localeCompare(b.start));
 }
+

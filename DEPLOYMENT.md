@@ -1,62 +1,53 @@
-# calendar.bardzunk.am on cPanel
+# oratsuyts.bardzunk.am on cPanel
 
-This branch exports Next.js to static files. The hosting account needs Apache
-with mod_rewrite, HTTPS and explicit FTPS; Node.js runs only in GitHub Actions.
-Content remains in src/content. All existing calendar years (1900–2200), both
-languages, feast pages and query filters remain supported. Only the dates
-actually present in the content files are displayed as feasts.
+Production is a static React SPA. Node.js runs in GitHub Actions only.
+Apache must allow `.htaccess` and mod_rewrite. Direct month and feast URLs
+are internally rewritten to index.html; the browser handles navigation.
 
-## One-time cPanel setup
+## Destination
 
-1. Create calendar.bardzunk.am with its own empty document root. Turn OFF
-   sharing bardzunk.am's document root. Enable HTTPS using the host's SSL tools.
-2. Point the calendar DNS record to this shared hosting server if needed.
-3. Create a dedicated FTP user jailed to the calendar document root. Do not use
-   the main account, and do not point deployment at bardzunk.am's WordPress root.
-4. Find the FTP server hostname with a valid TLS certificate and confirm the
-   provider supports explicit FTPS on port 21. This script does not support
-   plain FTP, implicit FTPS or SFTP. Keep certificate verification enabled.
+- Domain: https://oratsuyts.bardzunk.am
+- Separate document root: /home1/bardzunk/oratsuyts.bardzunk.am
+- Dedicated jailed FTP account: oratsuyts-deploy@oratsuyts.bardzunk.am
+- Verified explicit FTPS server: rs003.webhostbox.net, port 21
+- FTP_REMOTE_DIR: / (relative to the jailed account)
 
-## GitHub setup (alexmelikgit/calendar)
+Never deploy to bardzunk.am's WordPress root. Keep TLS verification enabled.
+The FTP server certificate covers rs003.webhostbox.net; bardzunk.am and
+ftp.bardzunk.am do not match that certificate.
 
-Settings → Secrets and variables → Actions → Secrets: add repository secrets:
+## GitHub Actions
 
-| Secret | Value |
-| --- | --- |
-| FTP_HOST | Provider's FTP hostname, without a URL scheme |
-| FTP_USER | Dedicated FTP user's full username |
-| FTP_PASSWORD | Dedicated user's password |
-| FTP_REMOTE_DIR | `/` for an account jailed directly to the subdomain root; otherwise its verified subdomain directory |
+Repository: alexmelikgit/calendar. Main pushes and pull requests run install,
+lint, calendar checks and production build, then retain a calendar-static
+artifact for seven days. Only main deploys, and only if repository variable
+DEPLOY_ENABLED is true. A newer run cancels an older run to prevent overlapping
+uploads. Repository secrets are FTP_HOST, FTP_USER, FTP_PASSWORD and
+FTP_REMOTE_DIR. Never put credentials in source files.
 
-First merge the reviewed PR. The workflow builds on main pushes and PRs, and
-uploads a `calendar-static` artifact. Deployment is initially OFF.
+Only out/ is uploaded: about two dozen files instead of 36,000. Original
+PNGs are resized to at most 1600 pixels wide and converted to WebP during
+the build. Assets arrive before index.html, and .htaccess is uploaded last.
+Interrupted FTPS connections retry automatically. Remote files are never
+deleted; files left from an older Next.js export are bypassed by the SPA
+rewrite rules and can be cleaned up separately.
 
-After confirming the destination and secrets, add repository VARIABLE
-`DEPLOY_ENABLED` = `true` in the Variables tab. Open Actions → Build and deploy
-static calendar → Run workflow → main. Future main pushes build and deploy.
-Forks may require enabling Actions first.
+## Verify
 
-The upload includes `.htaccess` and only the `out/` output. No source, Git
-history, node_modules, credentials or database is uploaded. Existing remote
-files are never deleted; obsolete hashed assets can be cleaned up separately.
-The complete original year range generates about 7,200 month pages, so the
-first FTPS upload can take a while.
+- Root selects Armenian and the current month using Asia/Yerevan time.
+- /2027/01?day=2027-01-06 redirects in the browser to the Armenian month.
+- /hy/2027/01 and /en/2027/01 load directly and after refresh.
+- Month navigation, browser Back/Forward, picker, filters, day dialogs,
+  feast pages, language switch, illustrations and fonts work.
+- Invalid routes show the in-app not-found screen (HTTP 200 SPA fallback).
+- Calendar years are 1900–2200; feasts appear only on dates present in
+  src/content/feasts.ts. This migration does not invent missing-year events.
 
-## Verify after deployment
-
-- `/` opens Armenian and selects the current month in Asia/Yerevan at visit time.
-- `/2027/01?day=2027-01-06` redirects to Armenian, retaining query parameters.
-- `/hy/2027/01/` and `/en/2027/01/` load directly and survive refresh.
-- Filters, highlighted dates, feast pages, language switching and navigation work.
-- Illustrations and fonts load; invalid localized URLs return a 404.
-
-`npm run build` generates `out/`; `npm run lint` checks the source.
-For a local preview use an Apache server configured to allow the supplied
-`.htaccess`. A plain static server can preview localized paths, but cannot
-exercise the Apache redirects.
+For local development use npm run dev, and npm run build then npm run preview
+for production assets. Apache-specific rewrites must be checked on Apache.
 
 ## Rollback
 
-Set DEPLOY_ENABLED to false to pause automatic uploads. Revert the faulty code
-commit in GitHub, let the build pass, re-enable deployment and run main again.
-Keep the previous workflow artifact for a manual upload if needed.
+Set DEPLOY_ENABLED=false to pause uploads. Revert the faulty commit, let the
+checks pass, re-enable deployment and run main again. The preceding artifact
+can also be uploaded manually to the same dedicated document root.

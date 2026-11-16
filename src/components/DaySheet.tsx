@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "react-router";
 import { useEffect, useRef } from "react";
 import type { Locale } from "@/content/types";
 import type { Dictionary } from "@/i18n/dictionary";
@@ -81,7 +81,7 @@ export function DaySheet({ date, events, locale, dict, onClose }: Props) {
                   <p className="mt-2 text-[15px] leading-relaxed">{e.short}</p>
                   <EventNotes event={e} dict={dict} />
                   <Link
-                    href={`/${locale}/feasts/${e.slug}`}
+                    to={`/${locale}/feasts/${e.slug}`}
                     className="mt-3 inline-block text-sm font-medium text-[var(--accent)] underline-offset-4 hover:underline"
                   >
                     {dict.readMore} →
@@ -104,3 +104,4 @@ export function EventNotes({ event, dict }: { event: CalendarEvent; dict: Dictio
     </span>
   );
 }
+

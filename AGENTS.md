@@ -1,9 +1,13 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# Calendar development
 
-# This is NOT the Next.js you know
+This fork is a Vite / React browser application deployed to cPanel. It was
+migrated from Next.js; do not reintroduce per-month static exports or a
+Node.js production server.
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+- Preserve Armenian/English content, month/feast URLs, query filters and the
+  complete 1900–2200 date-picker range.
+- Edit content in src/content and keep the UI separate from content access.
+- Run npm run lint, npm run check and npm run build before deployment.
+- Public PNG illustrations are originals. Build-time WebP conversion only
+  modifies out/, never public/.
+- Only out/ is uploaded through verified FTPS to the dedicated subdomain.

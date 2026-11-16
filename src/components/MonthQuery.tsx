@@ -1,11 +1,11 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router";
 import { MonthView, type MonthViewProps } from "./MonthView";
 
 /** Query-dependent state is resolved in the browser on a static host. */
 export function MonthQuery(props: Omit<MonthViewProps, "initialHidden" | "focusDay">) {
-  const query = useSearchParams();
+  const [query] = useSearchParams();
   const initialHidden = (query.get("hide") ?? "").split(",")
     .filter((id) => props.categories.some((category) => category.id === id));
   const day = query.get("day") ?? "";

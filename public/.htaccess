@@ -1,12 +1,20 @@
 Options -Indexes -MultiViews
 DirectoryIndex index.html
-ErrorDocument 404 /404.html
 
 <IfModule mod_rewrite.c>
 RewriteEngine On
-# Replace Next.js Proxy: Armenian is the default language for printed QR URLs.
-RewriteRule ^$ /hy/ [R=302,L]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(?!hy(?:/|$)|en(?:/|$)|_next(?:/|$))([^.]*)$ /hy/$1 [R=302,L,NE]
+# Always serve the SPA for calendar routes, including old exported directories.
+RewriteRule ^(?:hy|en)(?:/.*)?$ index.html [END]
+# Existing assets and ACME verification files are served normally.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [END]
+# Preserve unprefixed calendar links and let the browser show invalid routes.
+RewriteRule ^[^.]*$ index.html [END]
+</IfModule>
+
+<IfModule mod_headers.c>
+<FilesMatch "^(index\.html|\.htaccess)$">
+Header set Cache-Control "no-cache"
+</FilesMatch>
 </IfModule>

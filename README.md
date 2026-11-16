@@ -1,16 +1,22 @@
-# Armenian calendar
+# Armenian church calendar
 
-Next.js 16 / React 19 calendar with Armenian and English content.
+React 19 / TypeScript / Vite browser application, with Armenian and English
+content. All calendar months (1900–2200) are calculated in the browser; no
+per-month HTML or React Server Component files are generated.
 
 ```sh
 npm ci
-npm run dev
+npm run dev       # http://localhost:5173
+npm run lint
+npm run check
+npm run build
+npm run preview
 ```
 
-`npm run build` creates a static `out/` directory for cPanel/Apache hosting.
-`npm run lint` checks the source.
+`npm run build` creates `out/`: one HTML entry, bundled JS/CSS, self-hosted
+fonts and twelve optimized WebP illustrations. Original PNGs stay unchanged
+in `public/illustrations/`. Node.js 24 runs locally and in GitHub Actions;
+the production cPanel server only serves static files.
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the subdomain, GitHub Actions and
-FTPS setup. See [HANDOVER.md](HANDOVER.md) for content and design context.
-Hosting instructions in DEPLOYMENT.md supersede the original handover's
-server/Proxy assumptions. Automatic upload remains off until configured.
+Content is edited in `src/content/`; see [HANDOVER.md](HANDOVER.md).
+Deployment and rollback: [DEPLOYMENT.md](DEPLOYMENT.md).

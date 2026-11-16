@@ -1,18 +1,14 @@
+import js from "@eslint/js";
 import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+import ts from "typescript-eslint";
+import hooks from "eslint-plugin-react-hooks";
+import refresh from "eslint-plugin-react-refresh";
 
-const eslintConfig = defineConfig([
-  ...nextVitals,
-  ...nextTs,
-  // Override default ignores of eslint-config-next.
-  globalIgnores([
-    // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-  ]),
+export default defineConfig([
+  globalIgnores([".next/**", "out/**", "build/**", "node_modules/**"]),
+  js.configs.recommended,
+  ts.configs.recommended,
+  { files: ["src/**/*.{ts,tsx}"], plugins: { "react-hooks": hooks, "react-refresh": refresh },
+    rules: { ...hooks.configs.recommended.rules, "react-refresh/only-export-components": ["warn", { allowConstantExport: true }] } },
+  { files: ["*.mjs", "scripts/*.mjs"], languageOptions: { globals: { console: "readonly", process: "readonly" } } },
 ]);
-
-export default eslintConfig;

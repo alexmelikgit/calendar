@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router";
 import type { Locale } from "@/content/types";
 import type { Dictionary } from "@/i18n/dictionary";
 import { formatRange } from "@/i18n/format";
@@ -28,7 +28,7 @@ export function FeastList({ events, locale, dict }: Props) {
             return (
               <li key={e.id}>
                 <Link
-                  href={`/${locale}/feasts/${e.slug}`}
+                  to={`/${locale}/feasts/${e.slug}`}
                   className="flex gap-4 rounded-2xl bg-card p-3 text-ink ring-[var(--accent)] transition-shadow hover:ring-2"
                 >
                   <span
@@ -59,3 +59,4 @@ export function FeastList({ events, locale, dict }: Props) {
     </section>
   );
 }
+

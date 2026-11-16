@@ -1,14 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "react-router";
+import { useLocation } from "react-router";
 import type { Locale } from "@/content/types";
 import { locales } from "@/i18n/config";
 
 const labels: Record<Locale, string> = { hy: "Հայ", en: "Eng" };
 
 export function LanguageSwitcher({ current, label }: { current: Locale; label: string }) {
-  const pathname = usePathname();
+  const { pathname, search, hash } = useLocation();
   const rest = pathname.split("/").slice(2).join("/");
 
   return (
@@ -16,7 +16,7 @@ export function LanguageSwitcher({ current, label }: { current: Locale; label: s
       {locales.map((l) => (
         <Link
           key={l}
-          href={`/${l}${rest ? `/${rest}` : ""}`}
+          to={`/${l}${rest ? `/${rest}` : ""}${search}${hash}`}
           hrefLang={l}
           aria-current={l === current ? "true" : undefined}
           className={`rounded-full px-3 py-1 transition-colors ${
@@ -29,3 +29,4 @@ export function LanguageSwitcher({ current, label }: { current: Locale; label: s
     </nav>
   );
 }
+

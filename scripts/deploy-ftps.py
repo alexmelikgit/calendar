@@ -24,10 +24,10 @@ def main():
     if any(not os.environ.get(name) for name in required):
         raise SystemExit("Set all four FTP repository secrets before enabling deployment.")
     output = Path("out")
-    if not (output / ".htaccess").is_file() or not (output / "hy/index.html").is_file():
+    if not (output / ".htaccess").is_file() or not (output / "index.html").is_file():
         raise SystemExit("Static build is missing; refusing to upload.")
     paths = sorted((p for p in output.rglob("*") if p.is_file()),
-                   key=lambda p: (p.suffix == ".html" or p.name == ".htaccess", str(p)))
+                   key=lambda p: (2 if p.name == ".htaccess" else 1 if p.suffix == ".html" else 0, str(p)))
     ftp = None
     current_parent = None
     directories = {"."}

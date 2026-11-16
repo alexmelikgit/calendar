@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link } from "react-router";
+import { useNavigate } from "react-router";
 import { useEffect, useRef, useState } from "react";
 import type { Locale } from "@/content/types";
 import type { Dictionary } from "@/i18n/dictionary";
@@ -29,9 +29,9 @@ export interface MonthViewProps {
   initialHidden: string[];
   /** A date to highlight on arrival ("?day=YYYY-MM-DD"), e.g. from "Go to date". */
   focusDay: string | null;
-  /** The month's illustration (rendered on the server). */
+  /** The month's illustration (rendered in the browser). */
   illustration: React.ReactNode;
-  /** The month's title and text (rendered on the server). */
+  /** The month's title and text (rendered in the browser). */
   themeText: React.ReactNode;
 }
 
@@ -39,7 +39,7 @@ const SWIPE_MIN = 60;
 
 export function MonthView(props: MonthViewProps) {
   const { locale, dict, ym, weeks, events, monthStart, monthEnd, categories } = props;
-  const router = useRouter();
+  const navigate = useNavigate();
   const today = useToday();
 
   const [hidden, setHidden] = useState(() => new Set(props.initialHidden));
@@ -60,7 +60,7 @@ export function MonthView(props: MonthViewProps) {
     const url = new URL(window.location.href);
     if (next.size) url.searchParams.set("hide", [...next].join(","));
     else url.searchParams.delete("hide");
-    window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+    navigate(url.pathname + url.search + url.hash, { replace: true });
   };
 
   /** Link to a month, keeping the filter; `day` highlights a date there. */
@@ -98,7 +98,7 @@ export function MonthView(props: MonthViewProps) {
       }
       return;
     }
-    router.push(hrefFor(target, day), { scroll: false });
+    navigate(hrefFor(target, day));
   };
 
   const visible = visibleFor(hidden);
@@ -120,12 +120,12 @@ export function MonthView(props: MonthViewProps) {
       if (selectedDay || pickerOpen || e.altKey || e.metaKey || e.ctrlKey) return;
       const target = e.target as HTMLElement;
       if (target.closest("input, textarea, select, [contenteditable]")) return;
-      if (e.key === "ArrowLeft") router.push(prevHref, { scroll: false });
-      if (e.key === "ArrowRight") router.push(nextHref, { scroll: false });
+      if (e.key === "ArrowLeft") navigate(prevHref);
+      if (e.key === "ArrowRight") navigate(nextHref);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [router, prevHref, nextHref, selectedDay, pickerOpen]);
+  }, [navigate, prevHref, nextHref, selectedDay, pickerOpen]);
 
   // Horizontal swipe on the grid changes month.
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -141,7 +141,7 @@ export function MonthView(props: MonthViewProps) {
     const dx = t.clientX - start.x;
     const dy = t.clientY - start.y;
     if (Math.abs(dx) < SWIPE_MIN || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-    router.push(dx < 0 ? nextHref : prevHref, { scroll: false });
+    navigate(dx < 0 ? nextHref : prevHref);
   };
 
   const navBtn =
@@ -181,10 +181,10 @@ export function MonthView(props: MonthViewProps) {
               {dict.today}
             </button>
           )}
-          <Link href={prevHref} scroll={false} aria-label={dict.previousMonth} className={navBtn}>
+          <Link to={prevHref} aria-label={dict.previousMonth} className={navBtn}>
             <ChevronLeft />
           </Link>
-          <Link href={nextHref} scroll={false} aria-label={dict.nextMonth} className={navBtn}>
+          <Link to={nextHref} aria-label={dict.nextMonth} className={navBtn}>
             <ChevronRight />
           </Link>
         </div>
