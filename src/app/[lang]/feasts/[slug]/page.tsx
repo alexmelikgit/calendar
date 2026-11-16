@@ -10,6 +10,12 @@ import { getCategory, getDatesOf, getFeast } from "@/lib/content";
 
 type Props = PageProps<"/[lang]/feasts/[slug]">;
 
+export const dynamicParams = false;
+export async function generateStaticParams() {
+  const { feasts } = await import("@/content/feasts");
+  return feasts.map(({ slug }) => ({ slug }));
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, slug } = await params;
   const feast = await getFeast(slug);
@@ -84,3 +90,4 @@ export default async function FeastPage({ params }: Props) {
     </div>
   );
 }
+

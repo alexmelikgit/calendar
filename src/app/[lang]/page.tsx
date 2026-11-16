@@ -1,10 +1,9 @@
-import { redirect } from "next/navigation";
-import { connection } from "next/server";
-import { monthPath, todayInYerevan } from "@/lib/calendar";
+import { notFound } from "next/navigation";
+import { isLocale } from "@/i18n/config";
+import { CurrentMonthRedirect } from "@/components/CurrentMonthRedirect";
 
-/** "/hy" → the current month, e.g. "/hy/2026/10". */
 export default async function LangHome({ params }: PageProps<"/[lang]">) {
-  await connection(); // "today" must be computed per request, not at build time
   const { lang } = await params;
-  redirect(monthPath(lang, todayInYerevan()));
+  if (!isLocale(lang)) notFound();
+  return <CurrentMonthRedirect locale={lang} />;
 }

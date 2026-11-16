@@ -1,5 +1,10 @@
 # Handover — Տոնացույց (Armenian Apostolic Church calendar)
 
+> Hosting update: the cPanel adaptation uses static export, browser-side query
+> handling/current-month selection, and Apache redirects instead of Proxy.
+> Read [DEPLOYMENT.md](DEPLOYMENT.md) for current deployment instructions;
+> the original hosting/Proxy notes below describe the pre-export version.
+
 This document is for the next person or AI assistant picking up this project. Read it together with `README.md`, which covers day-to-day editing in more detail.
 
 ---
@@ -199,3 +204,4 @@ public/illustrations/
 - **"Today" is computed on the client** (`use-today.ts`) to avoid server/visitor timezone mismatch. The server redirect for `/hy` uses Asia/Yerevan time.
 - Illustrations use `next/image` with `fill`. A missing file triggers `onError`, which shows the placeholder, so 400 errors in the console for missing images are expected until the files are added.
 - `lint` and `build` currently pass cleanly. Keep it that way.
+
