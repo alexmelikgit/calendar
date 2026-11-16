@@ -1,0 +1,20 @@
+name: Inspect public FTPS hostnames
+on:
+  push:
+    branches: [diagnose-ftps-hostname]
+permissions:
+  contents: read
+jobs:
+  certificate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Inspect certificate and verify candidate hostnames without logging in
+        shell: bash
+        run: |
+          for host in ftp.bardzunk.am bardzunk.am rs003.webhostbox.net; do
+            echo "=== $host ==="
+            timeout 15 openssl s_client -starttls ftp -connect "$host:21" -servername "$host" -verify_hostname "$host" -showcerts </dev/null > /tmp/ftps-certificate.txt 2>/tmp/ftps-status.txt || true
+            openssl x509 -in /tmp/ftps-certificate.txt -noout -subject -issuer -ext subjectAltName || true
+            grep -E 'verify error|Verification|Verify return|verify return|error:' /tmp/ftps-status.txt /tmp/ftps-certificate.txt || true
+          done
