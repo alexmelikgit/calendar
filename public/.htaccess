@@ -1,0 +1,12 @@
+Options -Indexes -MultiViews
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+# Replace Next.js Proxy: Armenian is the default language for printed QR URLs.
+RewriteRule ^$ /hy/ [R=302,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(?!hy(?:/|$)|en(?:/|$)|_next(?:/|$))([^.]*)$ /hy/$1 [R=302,L,NE]
+</IfModule>

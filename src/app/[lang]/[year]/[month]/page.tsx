@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { MonthQuery } from "@/components/MonthQuery";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MonthIllustration } from "@/components/MonthIllustration";
-import { MonthView } from "@/components/MonthView";
+
 import { SiteHeader } from "@/components/SiteHeader";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionary";
@@ -10,6 +12,15 @@ import { buildMonthGrid, monthRange, parseYearMonth } from "@/lib/calendar";
 import { getCategories, getEventsBetween, getMonthTheme } from "@/lib/content";
 
 type Props = PageProps<"/[lang]/[year]/[month]">;
+
+// Preserve the existing date picker's complete supported range.
+export const dynamicParams = false;
+export function generateStaticParams() {
+  return Array.from({ length: 301 * 12 }, (_, i) => ({
+    year: String(1900 + Math.floor(i / 12)),
+    month: String((i % 12) + 1).padStart(2, "0"),
+  }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, year, month } = await params;
@@ -23,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function MonthPage({ params, searchParams }: Props) {
+export default async function MonthPage({ params }: Props) {
   const { lang, year, month } = await params;
   const ym = parseYearMonth(year, month);
   if (!isLocale(lang) || !ym) notFound();
@@ -34,25 +45,20 @@ export default async function MonthPage({ params, searchParams }: Props) {
   const gridEnd = weeks[weeks.length - 1][6].date;
   const { start: monthStart, end: monthEnd } = monthRange(ym);
 
-  const [theme, events, categories, query] = await Promise.all([
+  const [theme, events, categories] = await Promise.all([
     getMonthTheme(ym.month),
     getEventsBetween(gridStart, gridEnd, lang),
     getCategories(lang),
-    searchParams,
   ]);
 
-  const hide = typeof query.hide === "string" ? query.hide.split(",") : [];
-  const initialHidden = hide.filter((id) => categories.some((c) => c.id === id));
-  // "?day=2027-03-28" highlights that date (only if it is in this month).
-  const day = typeof query.day === "string" ? query.day : "";
-  const focusDay = /^\d{4}-\d{2}-\d{2}$/.test(day) && day >= monthStart && day <= monthEnd ? day : null;
 
   return (
     <div style={{ "--accent": theme.accent } as React.CSSProperties}>
       <SiteHeader locale={lang} dict={dict} />
 
       <main className="mx-auto max-w-7xl md:px-8">
-        <MonthView
+        <Suspense fallback={<p className="p-4">{dict.siteTitle}</p>}>
+        <MonthQuery
           key={`${ym.year}-${ym.month}`}
           locale={lang}
           dict={dict}
@@ -62,8 +68,6 @@ export default async function MonthPage({ params, searchParams }: Props) {
           monthStart={monthStart}
           monthEnd={monthEnd}
           categories={categories}
-          initialHidden={initialHidden}
-          focusDay={focusDay}
           illustration={
             <MonthIllustration
               key={theme.illustration.file}
@@ -96,7 +100,9 @@ export default async function MonthPage({ params, searchParams }: Props) {
             </section>
           }
         />
+        </Suspense>
       </main>
     </div>
   );
 }
+

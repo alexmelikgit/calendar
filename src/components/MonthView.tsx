@@ -15,7 +15,7 @@ import { MonthGrid } from "./MonthGrid";
 import { CategoryFilter } from "./CategoryFilter";
 import { MonthPicker } from "./MonthPicker";
 
-interface Props {
+export interface MonthViewProps {
   locale: Locale;
   dict: Dictionary;
   ym: YearMonth;
@@ -37,7 +37,7 @@ interface Props {
 
 const SWIPE_MIN = 60;
 
-export function MonthView(props: Props) {
+export function MonthView(props: MonthViewProps) {
   const { locale, dict, ym, weeks, events, monthStart, monthEnd, categories } = props;
   const router = useRouter();
   const today = useToday();
@@ -55,10 +55,13 @@ export function MonthView(props: Props) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   // Keep the filter in the URL so it survives month changes and can be shared.
-  const query = hidden.size ? `?hide=${[...hidden].join(",")}` : "";
-  useEffect(() => {
-    window.history.replaceState(null, "", `${window.location.pathname}${query}`);
-  }, [query]);
+  const saveFilter = (next: Set<string>) => {
+    setHidden(next);
+    const url = new URL(window.location.href);
+    if (next.size) url.searchParams.set("hide", [...next].join(","));
+    else url.searchParams.delete("hide");
+    window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+  };
 
   /** Link to a month, keeping the filter; `day` highlights a date there. */
   const hrefFor = (target: YearMonth, day?: string) => {
@@ -104,14 +107,12 @@ export function MonthView(props: Props) {
     ? visible.filter((e) => e.start <= selectedDay && e.end >= selectedDay)
     : [];
 
-  const toggle = (id: string) =>
-    setHidden((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      // Hiding everything is never useful: treat it as "show all".
-      return next.size === categories.length ? new Set() : next;
-    });
+  const toggle = (id: string) => {
+    const next = new Set(hidden);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    saveFilter(next.size === categories.length ? new Set() : next);
+  };
 
   // ← → keys change month (when no dialog is open).
   useEffect(() => {
@@ -192,7 +193,7 @@ export function MonthView(props: Props) {
             categories={categories}
             hidden={hidden}
             onToggle={toggle}
-            onShowAll={() => setHidden(new Set())}
+            onShowAll={() => saveFilter(new Set())}
             label={dict.filterLabel}
             allLabel={dict.all}
           />
@@ -240,3 +241,4 @@ export function MonthView(props: Props) {
     </div>
   );
 }
+
